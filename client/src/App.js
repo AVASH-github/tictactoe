@@ -1,23 +1,17 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import useSocket from "./hooks/useSocket";
+import Board from "./components/Board";
+import Status from "./components/Status";
 
 function App() {
+  const [roomId] = useState("room1"); // Hardcoded room
+  const { board, turn, myTurn, makeMove } = useSocket(roomId);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <h1>Tic Tac Toe - Room: {roomId}</h1>
+      <Status turn={turn} myTurn={myTurn} />
+      <Board board={board} makeMove={makeMove} />
     </div>
   );
 }

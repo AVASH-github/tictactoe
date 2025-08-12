@@ -1,4 +1,12 @@
-export default function Status({ turn, myTurn }) {
+export default function Status({ turn, myTurn, winner }) {
+  if (winner) {
+    return (
+      <div className="mt-6 text-2xl font-bold text-green-400 drop-shadow-neon">
+        Player {winner} Wins! 🎉
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6">
       <span

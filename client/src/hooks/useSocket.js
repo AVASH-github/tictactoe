@@ -1,12 +1,23 @@
 import { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
+import calculateWinner from "../utils/calculateWinner";
+
 
 export default function useSocket(roomId) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [turn, setTurn] = useState("X");
   const [myTurn, setMyTurn] = useState(true);
+    const [winner, setWinner] = useState(null);
 
   const socketRef = useRef();
+
+   useEffect(() => {
+    const w = calculateWinner(board);
+    if (w) {
+      setWinner(w);
+      setMyTurn(false);
+    }
+  }, [board]);
 
   useEffect(() => {
     socketRef.current = io("http://localhost:4000");
@@ -42,5 +53,5 @@ export default function useSocket(roomId) {
     setMyTurn(false);
   };
 
-  return { board, turn, myTurn, makeMove };
+  return {  board, turn, myTurn, winner, makeMove  };
 }

@@ -8,10 +8,13 @@ function App() {
   const { board, turn, myTurn, makeMove } = useSocket(roomId);
 
   return (
-    <div>
-      <h1>Tic Tac Toe - Room: {roomId}</h1>
-      <Status turn={turn} myTurn={myTurn} />
+   <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-900 text-white p-6 font-orbitron">
+      <h1 className="text-5xl font-extrabold mb-8 text-indigo-400 drop-shadow-neon">
+        Tic Tac Toe
+      </h1>
       <Board board={board} makeMove={makeMove} />
+      {/* status, reset button, etc */}
+      <Status turn={turn} myTurn={myTurn} />
     </div>
   );
 }

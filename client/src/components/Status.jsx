@@ -1,21 +1,16 @@
-import React from "react";
-
-export default function Square({ value, onClick }) {
+export default function Status({ turn, myTurn }) {
   return (
-    <div
-      onClick={onClick}
-      style={{
-        border: "1px solid black",
-        height: 100,
-        width: 100,
-        textAlign: "center",
-        lineHeight: "100px",
-        fontSize: 24,
-        cursor: value ? "not-allowed" : "pointer",
-        backgroundColor: value ? "#f1f1f1" : "white",
-      }}
-    >
-      {value}
+    <div className="mt-6">
+      <span
+        className={`inline-block px-4 py-1 rounded-full font-bold 
+        ${
+          myTurn
+            ? "bg-indigo-600 animate-pulse text-white"
+            : "bg-gray-700 text-gray-400"
+        }`}
+      >
+        {myTurn ? `Your Turn (${turn})` : `Waiting for Opponent (${turn})`}
+      </span>
     </div>
   );
 }

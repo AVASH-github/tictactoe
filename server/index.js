@@ -14,27 +14,79 @@ const io = socketIO(server, {
   },
 });
 
+// Track players in rooms
+const rooms = {}; // { roomId: { X: socketId, O: socketId } }
+
 io.on("connection", (socket) => {
   console.log("New Client Connected", socket.id);
 
   socket.on("join-room", (roomId) => {
+    // Create room if it doesn't exist
+    if (!rooms[roomId]) rooms[roomId] = {};
+
+    // Check room occupancy
+    const players = Object.keys(rooms[roomId]);
+    if (players.length >= 2) {
+      socket.emit("room-full");
+      return;
+    }
+
+    // Assign X or O
+    const playerSymbol = players.includes("X") ? "O" : "X";
+    rooms[roomId][playerSymbol] = socket.id;
+
     socket.join(roomId);
-    console.log(`${socket.id} joined room ${roomId}`);
+    socket.data.symbol = playerSymbol;
+
+    console.log(`Player ${playerSymbol} (${socket.id}) joined room ${roomId}`);
+
+    // Notify player of their symbol
+    socket.emit("player-symbol", playerSymbol);
   });
 
+  // Handle moves
   socket.on("make-move", ({ roomId, board, turn }) => {
-    // Send move to all other players in the room
     socket.to(roomId).emit("update-board", { board, turn });
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected", socket.id);
+  // Reset game
+  socket.on("reset-game", ({ roomId }) => {
+    io.to(roomId).emit("reset-board");
   });
 
-  socket.on("reset-game", ({ roomId }) => {
-  io.to(roomId).emit("reset-board");
+  // Rematch requests
+ // Rematch requests
+socket.on("rematch-request", ({ roomId, from }) => {
+  socket.to(roomId).emit("rematch-request", { from }); // notify other player
 });
 
+socket.on("rematch-accepted", ({ roomId }) => {
+  io.in(roomId).emit("rematch-accepted"); // notify both players to reset game
+});
+
+socket.on("rematch-rejected", ({ roomId }) => {
+  socket.to(roomId).emit("rematch-rejected"); // notify the requester
+});
+
+
+  // Handle disconnect
+  socket.on("disconnect", () => {
+    console.log("Client disconnected", socket.id);
+
+    // Remove player from rooms
+    for (const roomId in rooms) {
+      const room = rooms[roomId];
+      for (const symbol in room) {
+        if (room[symbol] === socket.id) {
+          delete room[symbol];
+          // Notify remaining player
+          socket.to(roomId).emit("player-left", { symbol });
+        }
+      }
+      // Clean up empty room
+      if (Object.keys(room).length === 0) delete rooms[roomId];
+    }
+  });
 });
 
 server.listen(4000, () => {

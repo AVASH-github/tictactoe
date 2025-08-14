@@ -2,16 +2,16 @@ import { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import calculateWinner from "../utils/calculateWinner";
 
-
 export default function useSocket(roomId) {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [turn, setTurn] = useState("X");
   const [myTurn, setMyTurn] = useState(true);
-    const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState(null);
 
   const socketRef = useRef();
 
-   useEffect(() => {
+  // Check for winner
+  useEffect(() => {
     const w = calculateWinner(board);
     if (w) {
       setWinner(w);
@@ -19,14 +19,36 @@ export default function useSocket(roomId) {
     }
   }, [board]);
 
+  // Reset game function
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setTurn("X");
+    setWinner(null);
+    setMyTurn(true);
+
+    socketRef.current.emit("reset-game", { roomId });
+  };
+
+  // Listen for reset event from server
+  useEffect(() => {
+    if (!socketRef.current) return;
+
+    socketRef.current.on("reset-board", () => {
+      setBoard(Array(9).fill(null));
+      setTurn("X");
+      setWinner(null);
+      setMyTurn(true);
+    });
+  }, []);
+
+  // Socket connection
   useEffect(() => {
     socketRef.current = io("http://localhost:4000");
 
     socketRef.current.emit("join-room", roomId);
 
     socketRef.current.on("update-board", ({ board, turn }) => {
-      console.log("Received update-board", board, turn); // add this
-        setBoard(board);
+      setBoard(board);
       setTurn(turn);
       setMyTurn(true);
     });
@@ -53,5 +75,5 @@ export default function useSocket(roomId) {
     setMyTurn(false);
   };
 
-  return {  board, turn, myTurn, winner, makeMove  };
+  return { board, turn, myTurn, winner, makeMove, resetGame };
 }

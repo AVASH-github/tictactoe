@@ -30,6 +30,11 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id);
   });
+
+  socket.on("reset-game", ({ roomId }) => {
+  io.to(roomId).emit("reset-board");
+});
+
 });
 
 server.listen(4000, () => {

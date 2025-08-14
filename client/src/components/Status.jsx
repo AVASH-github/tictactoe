@@ -1,5 +1,12 @@
 export default function Status({ turn, myTurn, winner }) {
   if (winner) {
+    if (winner === "Draw") {
+      return (
+        <div className="mt-6 text-2xl font-bold text-yellow-400 drop-shadow-neon animate-pulse">
+          It's a Draw! 🤝
+        </div>
+      );
+    }
     return (
       <div className="mt-6 text-2xl font-bold text-green-400 drop-shadow-neon">
         Player {winner} Wins! 🎉

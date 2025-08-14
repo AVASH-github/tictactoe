@@ -18,6 +18,17 @@ export default function useSocket(roomId) {
       setMyTurn(false);
     }
   }, [board]);
+//check for draw
+useEffect(() => {
+  const w = calculateWinner(board);
+  if (w) {
+    setWinner(w);
+    setMyTurn(false);
+  } else if (board.every(cell => cell !== null)) {
+    setWinner("Draw");
+    setMyTurn(false);
+  }
+}, [board]);
 
   // Reset game function
   const resetGame = () => {
